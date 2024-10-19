@@ -3,28 +3,50 @@
     <head>
         <title>Infinite Craft</title>
         <script src="random_ao3.js"></script>
+        <link rel="stylesheet" href="https://archiveofourown.org/stylesheets/site/2.0/01-core.css">
+        <link rel="stylesheet" href="https://archiveofourown.org/stylesheets/site/2.0/02-elements.css">
+        <link rel="stylesheet" href="https://archiveofourown.org/stylesheets/site/2.0/05-region-main.css">
+        <link rel="stylesheet" href="https://archiveofourown.org/stylesheets/site/2.0/07-interactions.css">
+        <link rel="stylesheet" href="https://archiveofourown.org/stylesheets/site/2.0/08-actions.css">
+        <link rel="stylesheet" href="https://archiveofourown.org/stylesheets/site/2.0/09-roles-states.css">
+        <link rel="stylesheet" href="https://archiveofourown.org/stylesheets/site/2.0/10-types-groups.css">
+        <link rel="stylesheet" href="https://archiveofourown.org/stylesheets/site/2.0/11-group-listbox.css">
+        <link rel="stylesheet" href="https://archiveofourown.org/stylesheets/site/2.0/12-group-meta.css">
+        <link rel="stylesheet" href="https://archiveofourown.org/stylesheets/site/2.0/13-group-blurb.css">
+        <link rel="stylesheet" href="https://archiveofourown.org/stylesheets/site/2.0/14-group-preface.css">
+        <link rel="stylesheet" href="https://archiveofourown.org/stylesheets/site/2.0/15-group-comments.css">
     </head>
 <body>
-    <h1>Manya's random Ao3 fic generator by fandom</h1>
+    <div id="main">
+    <h2 class="heading">Manya's random Ao3 fic generator by fandom</h1>
 
     <form id="myForm">
-        <label>Fandom:</label>
-        <div>
+        <label style="padding: 5px;">Fandom:</label>
+        <div style="padding: 5px;width: 25%;">
             <select id="fandom" name="fandom" onchange="showOtherInput()">
                 <option value="https://archiveofourown.org/tags/%E9%AD%94%E9%81%93%E7%A5%96%E5%B8%88%20-%20%E5%A2%A8%E9%A6%99%E9%93%9C%E8%87%AD%20%7C%20M%C3%B3d%C3%A0o%20Z%C7%94sh%C4%AB%20-%20M%C3%B2xi%C4%81ng%20T%C3%B3ngxi%C3%B9/works">MDZS</option>
                 <option value="https://archiveofourown.org/tags/%E9%99%88%E6%83%85%E4%BB%A4%20%7C%20The%20Untamed%20(TV)/works">The Untamed</option>
                 <option value="https://archiveofourown.org/tags/%E5%A4%A9%E5%AE%98%E8%B5%90%E7%A6%8F%20-%20%E5%A2%A8%E9%A6%99%E9%93%9C%E8%87%AD%20%7C%20Ti%C4%81n%20Gu%C4%81n%20C%C3%AC%20F%C3%BA%20-%20M%C3%B2xi%C4%81ng%20T%C3%B3ngxi%C3%B9/works">TGCF</option>
+                <option value="https://archiveofourown.org/tags/%E7%90%85%E7%90%8A%E6%A6%9C%20%7C%20Nirvana%20in%20Fire%20(TV)/works">NiF</option>
+                <option value="https://archiveofourown.org/tags/Dream%20SMP/works">Dream SMP</option>
+                <option value="https://archiveofourown.org/tags/3rd%20Life%20%7C%20Last%20Life%20SMP%20Series/works">3rd Life | Last Life SMP Series</option>
+                <option value="https://archiveofourown.org/tags/We%20Know%20the%20Devil%20(Visual%20Novel)/works">WKtD</option>
                 <option value="other">Other</option>
             </select>
         </div>
 
         <div id="other-input" style="display: none;">
             <label for="otherFandom">Please put in the link to the fandom you want:</label>
-            <input type="url" id="otherFandom" name="otherFandom">
+            <input type="url" id="otherFandom" name="otherFandom" style="padding: 5px;width: 25%;">
         </div>
         
         <button type="submit"">Get Random Fic</button>
     </form>
 
-    <div id="resultDiv"></div>
+    <div class="works-index filtered region">
+        <ol class="work index group">
+            <div id="resultDiv" class="work blurb group"></div>
+        </ol>
+    </div>
+</div>
 </body>
