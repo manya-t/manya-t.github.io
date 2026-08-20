@@ -683,32 +683,34 @@
   /* Padding, not margin: a top margin here would collapse into the
      previous element's bottom margin and do nothing.
 
-     Both of these iterate, because adding padding can move the very box
-     being measured - the hero's two columns are centre-aligned, so
-     growing the text column shifts it back up by half of what was added.
-     The correction shrinks geometrically, so a few passes settle it. */
+     Both of these are bounded on purpose. The right answer is always
+     less than one step (two, where there is feedback), so anything past
+     that is a bad measurement rather than a real correction. Without the
+     clamp, a webfont swapping in mid-pass changes the height under us,
+     no pass ever agrees, and the padding piles up into a blank screen. */
   function settleTop(el, step){
     el.style.paddingTop = "";
     var base = parseFloat(window.getComputedStyle(el).paddingTop) || 0;
     var extra = 0, k, d;
-    for(k = 0; k < 16; k++){
+    /* This one does iterate: a centre-aligned grid column shifts back up
+       by half of whatever is added to it, so the fix takes a few passes.
+       The answer still lives inside two steps, hence the modulo. */
+    for(k = 0; k < 8; k++){
       d = upTo(docTop(el) + base + extra, step);
       if(d < 0.02) break;
-      extra += d;
+      extra = (extra + d) % (step * 2);
       el.style.paddingTop = (base + extra).toFixed(2) + "px";
     }
   }
 
   function settleBottom(el, step){
+    /* Single pass. Padding-bottom extends the box downward by exactly
+       what you add, so measuring once is enough and looping can only
+       compound a stale measurement. */
     el.style.paddingBottom = "";
     var base = parseFloat(window.getComputedStyle(el).paddingBottom) || 0;
-    var extra = 0, k, d;
-    for(k = 0; k < 16; k++){
-      d = upTo(docTop(el) + el.getBoundingClientRect().height, step);
-      if(d < 0.02) break;
-      extra += d;
-      el.style.paddingBottom = (base + extra).toFixed(2) + "px";
-    }
+    var d = upTo(docTop(el) + el.getBoundingClientRect().height, step);
+    if(d >= 0.02) el.style.paddingBottom = (base + d).toFixed(2) + "px";
   }
 
   function rhythm(){
@@ -786,7 +788,13 @@
 
   layout();
   window.addEventListener("resize", layout);
-  window.addEventListener("load", layout);
+  window.addEventListener("load", function(){
+    layout();
+    /* Webfonts can land just after fonts.ready resolves, which changes
+       every text height. Two cheap passes catch that on a cold load. */
+    setTimeout(layout, 250);
+    setTimeout(layout, 1200);
+  });
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
 
   /* ================= photo carousel ================= */
