@@ -210,10 +210,24 @@
   .step h3{font-size:1.3rem; line-height:26px; margin:0 0 12px;}
   .step p{margin:0; color:var(--ink-soft); font-size:16.5px; line-height:26px;}
 
+  /* ---------- What I can do ----------
+     Small single-cell marks rather than the big glyphs used elsewhere:
+     six of those would need to be two heavy rows apart to stay on the
+     grid, which would run the list to nearly 700px. */
+  .section-lede{margin:0 0 28px; color:var(--ink-soft); font-size:17px; line-height:28px;}
+  .can-list{list-style:none; margin:0; padding:0;}
+  .can-list li{
+    display:grid; grid-template-columns:var(--c) 1fr; gap:18px;
+    align-items:start; margin:0 0 18px;
+    color:var(--ink-soft); font-size:16.5px; line-height:26px;
+  }
+  .can-list li:last-child{margin-bottom:0;}
+  .can-list .sierp{width:var(--c); margin-top:6px;}   /* centred on the first line */
+
   /* ---------- photo carousel ---------- */
   .carousel{
     position:relative; width:calc(var(--s) * 8); height:448px;
-    margin:28px 0 42px var(--step-indent);
+    margin:42px 0;
   }
   .frames{position:absolute; inset:0; overflow:hidden; background:var(--paper-2);}
   .frame{
@@ -436,6 +450,41 @@
       </div>
     </div>
 
+    </div><!-- /.how-body -->
+  </div>
+</section>
+
+<section id="can-do" data-block>
+  <div class="wrap">
+    <h2>What I can do</h2>
+    <p class="section-lede">My students come from a wide range of backgrounds and have a wide range of skill levels. An incomplete list of what I can do for them:</p>
+    <ul class="can-list">
+      <li>
+        <span class="sierp" data-depth="1" data-gap="0.9" data-mono="#F4A868" aria-hidden="true"></span>
+        <span>Fill in large gaps for a floundering student and catch them up to their expected grade level</span>
+      </li>
+      <li>
+        <span class="sierp" data-depth="1" data-gap="0.9" data-mono="#B33A30" aria-hidden="true"></span>
+        <span>Be a safety net for a student, making sure they have the understanding they need to truly excel, now and in the future</span>
+      </li>
+      <li>
+        <span class="sierp" data-depth="1" data-gap="0.9" data-mono="#2E6E97" aria-hidden="true"></span>
+        <span>Go into deeper and more advanced material than school can typically provide</span>
+      </li>
+      <li>
+        <span class="sierp" data-depth="1" data-gap="0.9" data-mono="#F4A868" aria-hidden="true"></span>
+        <span>Prepare a student for standardized tests, SSATs, placement exams, SATs, and APs</span>
+      </li>
+      <li>
+        <span class="sierp" data-depth="1" data-gap="0.9" data-mono="#B33A30" aria-hidden="true"></span>
+        <span>Be a resource for immigrant families unfamiliar with how American school systems usually function</span>
+      </li>
+      <li>
+        <span class="sierp" data-depth="1" data-gap="0.9" data-mono="#2E6E97" aria-hidden="true"></span>
+        <span>Coach students for competitions such as AMC 8, 10, or 12, Mathcounts, AIME, or Math Kangaroo</span>
+      </li>
+    </ul>
+
     <!-- Placeholder photos. Swap the src values; object-position controls
          the crop if a face ends up too high or low in the frame. -->
     <div class="carousel" data-row="top">
@@ -447,7 +496,6 @@
       <button class="cbtn next" type="button" aria-label="Next photo"></button>
       <div class="dots"></div>
     </div>
-    </div><!-- /.how-body -->
   </div>
 </section>
 
