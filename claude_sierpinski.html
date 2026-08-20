@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manya Tyutyunik: Math Tutoring, Greater Boston</title>
+<meta name="description" content="One-on-one math tutoring, grades 2 to 12, from arithmetic through calculus, statistics, and competition math. Greater Boston and online.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Space+Grotesk:wght@400;500;600&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ---- the module ----
+       Two weights. The heavy grid is the one everything aligns to: cell
+       side S, row height SH. The faint grid is that cell quartered, and
+       is texture only. SH is a round pixel value; S derives from it.
+         S = 2 * SH / sqrt(3) */
+    --s:64.66325px;   /* heavy cell side      */
+    --sh:56px;        /* heavy row height     */
+    --s2:32.33162px;  /* half heavy cell      */
+    --c:16.16581px;   /* faint cell side      */
+    --ch:14px;        /* faint row height     */
+    --c2:8.0829px;
+    --step-indent:calc(var(--s) + 24px);  /* mark column + gap */
+
+    /* ---- colour, pulled out of the artwork ---- */
+    --paper:#FBF8F2;
+    --paper-2:#F5EFE4;
+    --ink:#33211D;         /* the red branch carried to near-black */
+    --ink-soft:#7A6154;    /* the artwork's neutral branch */
+    --red:#B33A30;
+    --red-deep:#8F2C24;
+    --orange:#F4A868;      /* the basic orange */
+    --orange-deep:#A84A15;
+    --blue:#2E6E97;
+    --blue-mid:#255A7C;
+    --blue-deep:#12365E;
+    --line:rgba(51,33,29,0.12);
+
+    /* ---- the lattice: faint texture + the heavy grid over it ---- */
+    --grid-faint:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16.16581' height='28' viewBox='0 0 16.16581 28'%3E%3Cpath d='M0 0H16.166M0 14H16.166M0 0L8.083 14M16.166 0L8.083 14M8.083 14L0 28M8.083 14L16.166 28' fill='none' stroke='%2333211D' stroke-opacity='0.035' stroke-width='1'/%3E%3C/svg%3E");
+    --grid-heavy:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64.66325' height='112' viewBox='0 0 64.66325 112'%3E%3Cpath d='M0 0H64.663M0 56H64.663M0 0L32.332 56M64.663 0L32.332 56M32.332 56L0 112M32.332 56L64.663 112' fill='none' stroke='%2333211D' stroke-opacity='0.085' stroke-width='1'/%3E%3C/svg%3E");
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth; background-color:var(--paper);}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+
+  body{
+    margin:0;
+    color:var(--ink);
+    font-family:'Newsreader', serif;
+    font-size:18px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .lattice{
+    background-image:var(--grid-faint), var(--grid-heavy);
+    background-size:var(--c) 28px, var(--s) 112px;
+    background-position:0 0;
+    background-repeat:repeat;
+  }
+
+  .wrap{max-width:660px; margin:0 auto; padding:0 24px; position:relative; z-index:2;}
+  .wrap.wide{max-width:1064px;}
+
+  a{color:var(--red); text-decoration-thickness:1px; text-underline-offset:3px;}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--red); outline-offset:3px;}
+
+  h1,h2,h3{font-family:'Newsreader', serif; font-weight:500; font-style:italic;}
+
+  /* ---------- Sierpinski glyph hosts ----------
+     The host box is exactly the glyph's outer triangle. The script
+     snaps each glyph's apex onto a heavy-grid vertex. */
+  .sierp{display:block; line-height:0;}
+  .sierp svg{display:block; width:100%; height:auto; overflow:visible;}
+  .sierp g{
+    opacity:0;
+    transform-box:fill-box; transform-origin:50% 50%;
+    animation:tri-in 0.9s cubic-bezier(.2,.7,.3,1) forwards;
+  }
+  @keyframes tri-in{ from{opacity:0; transform:scale(0.86);} to{opacity:1; transform:none;} }
+  @media (prefers-reduced-motion: reduce){ .sierp g{opacity:1; animation:none;} }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative;
+    background-color:var(--paper);
+    padding:42px 0 56px;
+    overflow:hidden;
+  }
+  .hero-grid{
+    display:grid;
+    /* 8 heavy cells. The artwork is depth 5, so its smallest triangles
+       land on the faint grid and its outline on the heavy one. */
+    grid-template-columns:minmax(0,470px) calc(var(--s) * 8);
+    gap:28px; align-items:start;
+  }
+
+  .kicker{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:12px; font-weight:600;
+    letter-spacing:0.18em; text-transform:uppercase;
+    color:var(--ink-soft); margin:0 0 10px;
+  }
+
+  h1{
+    font-size:clamp(2.3rem, 5.2vw, 3.8rem);
+    line-height:1.02;
+    margin:0 0 10px;
+    letter-spacing:-0.01em;
+  }
+  .also-known{font-size:15px; color:var(--ink-soft); margin:0 0 18px;}
+  .tagline{font-size:20px; max-width:460px; color:var(--ink-soft); margin:0 0 18px;}
+
+  /* the three calls to action take the artwork's three branches, and
+     stand exactly one heavy row tall so they sit between two rules */
+  .cta-row{display:flex; flex-wrap:wrap; gap:14px; margin-bottom:18px;}
+  .btn{
+    display:inline-flex; align-items:center; gap:9px;
+    height:var(--sh); padding:0 24px;
+    font-family:'Space Grotesk', sans-serif; font-size:15px; font-weight:500;
+    letter-spacing:0.01em; text-decoration:none;
+    border:1.5px solid transparent; border-radius:2px;
+    background:var(--ink); color:var(--paper);
+    transition:background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+  }
+  .btn::before{
+    content:""; width:0; height:0; flex:0 0 auto;
+    border-left:5px solid transparent; border-right:5px solid transparent;
+    border-bottom:9px solid currentColor;
+    transition:transform 0.16s ease;
+  }
+  .btn:hover::before{transform:translateY(-1px);}
+  .btn.primary   {background:var(--red);    border-color:var(--red);    color:#fff;}
+  .btn.primary:hover{background:var(--red-deep); border-color:var(--red-deep);}
+  .btn.tint-blue {background:var(--blue);   border-color:var(--blue);   color:#fff;}
+  .btn.tint-blue:hover{background:var(--blue-mid); border-color:var(--blue-mid);}
+  .btn.tint-amber{background:var(--orange); border-color:var(--orange); color:var(--ink);}
+  .btn.tint-amber:hover{background:#EE9647; border-color:#EE9647;}
+
+  .contact-line{
+    font-family:'Space Grotesk', sans-serif; font-size:14px;
+    letter-spacing:0.02em; color:var(--ink-soft);
+  }
+  .contact-line a{color:var(--ink-soft); text-decoration:underline; text-decoration-color:rgba(51,33,29,0.28);}
+  .contact-line a:hover{color:var(--red);}
+
+  /* The artwork's file carries 50/150 units of padding inside its 1600
+     square (triangle spans x 50-1550, y 150.5-1449.5). The frame trims
+     that away, so the frame box IS the triangle, which is what gets
+     snapped. flow-root stops the negative margins collapsing out. */
+  .hero-art{position:relative;}
+  .ombre-frame{display:flow-root; width:100%;}
+  .ombre{display:block; width:106.6667%; height:auto; margin:-10.0333% -3.3333%;}
+  .hero-art .caption{
+    font-family:'Space Grotesk', sans-serif; font-size:11px; font-weight:500;
+    letter-spacing:0.16em; text-transform:uppercase;
+    color:var(--ink-soft); opacity:0.62; text-align:center; margin:14px 0 0;
+  }
+
+  /* ---------- sections ---------- */
+  section{padding:42px 0; position:relative; overflow:hidden; border-top:1px solid var(--line);}
+  @supports (mask: conic-gradient(#000 0 0)){
+    section{border-top:none;}
+    /* a row of faint-cell triangles; every fourth apex is a heavy vertex */
+    section::before{
+      content:""; position:absolute; top:0; left:0; right:0; height:var(--ch);
+      background:var(--blue);
+      -webkit-mask:conic-gradient(from 135deg at 50% 0, #000 0 90deg, transparent 0) var(--c2) 0/var(--c) var(--ch) repeat-x;
+      mask:conic-gradient(from 135deg at 50% 0, #000 0 90deg, transparent 0) var(--c2) 0/var(--c) var(--ch) repeat-x;
+    }
+    #contact::before{content:none;}   /* the dark panel brings its own toothed edge */
+  }
+
+  h2{font-size:2.1rem; margin:0 0 20px; letter-spacing:-0.005em;}
+
+  .watermark{
+    position:absolute; z-index:0; pointer-events:none;
+    opacity:0.075; width:calc(var(--s) * 8);
+  }
+  .watermark.right{right:calc(var(--s) * -1); top:var(--sh);}
+  .watermark.left{left:calc(var(--s) * -1.5); bottom:var(--sh); width:calc(var(--s) * 4);}
+
+  .handnote{
+    font-family:'Caveat', cursive; font-size:23px; color:var(--red);
+    display:inline-block; transform:rotate(-2.5deg); margin:0 0 4px;
+  }
+
+  /* ---------- Steps ----------
+     Each step is padded out to a whole number of heavy rows by the
+     script, so all three marks sit on rules and keep the same distance
+     from their own headings. */
+  .steps{display:flex; flex-direction:column; gap:0;}
+  .step{
+    display:grid; grid-template-columns:var(--s) 1fr;
+    gap:24px; align-items:start; padding-bottom:14px;
+  }
+  .step-mark .sierp{width:var(--s);}
+  .step-mark .n{
+    font-family:'Space Grotesk', sans-serif; font-size:11px; font-weight:600;
+    letter-spacing:0.16em; color:var(--ink-soft);
+    display:block; width:var(--s); text-align:center;
+    line-height:14px; margin-top:14px;
+  }
+  .step h3{font-size:1.3rem; line-height:26px; margin:0 0 12px;}
+  .step p{margin:0; color:var(--ink-soft); font-size:16.5px; line-height:26px;}
+
+  /* ---------- photo carousel ---------- */
+  .carousel{
+    position:relative; width:calc(var(--s) * 8); height:448px;
+    margin:28px 0 42px var(--step-indent);
+  }
+  .frames{position:absolute; inset:0; overflow:hidden; background:var(--paper-2);}
+  .frame{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; object-position:50% 38%;
+    opacity:0; transition:opacity 0.45s ease;
+  }
+  .frame.is-on{opacity:1;}
+  .cbtn{
+    position:absolute; top:50%; margin-top:-22px;
+    width:44px; height:44px; padding:0; border:0; background:none;
+    display:grid; place-items:center; cursor:pointer;
+  }
+  .cbtn::before{
+    content:""; width:0; height:0;
+    border-top:10px solid transparent; border-bottom:10px solid transparent;
+  }
+  .cbtn.prev{left:6px;}
+  .cbtn.next{right:6px;}
+  .cbtn::before{filter:drop-shadow(0 1px 3px rgba(0,0,0,0.55));}
+  .cbtn.prev::before{border-right:15px solid var(--paper);}
+  .cbtn.next::before{border-left:15px solid var(--paper);}
+  .cbtn:hover.prev::before{border-right-color:var(--orange);}
+  .cbtn:hover.next::before{border-left-color:var(--orange);}
+  .dots{
+    position:absolute; left:0; right:0; bottom:-28px;
+    display:flex; justify-content:center; gap:12px;
+  }
+  .dot{
+    width:22px; height:20px; padding:0; border:0; background:none;
+    display:grid; place-items:center; cursor:pointer;
+  }
+  .dot::before{
+    content:""; width:0; height:0;
+    border-left:7px solid transparent; border-right:7px solid transparent;
+    border-bottom:12px solid rgba(51,33,29,0.22);
+    transition:border-bottom-color 0.16s ease;
+  }
+  .dot[aria-selected="true"]::before{border-bottom-color:var(--red);}
+  .dot:hover::before{border-bottom-color:var(--ink-soft);}
+
+  /* ---------- Rates ----------
+     No rules: rows are one heavy row tall, and each mark fills its own
+     cell, which is what separates them. */
+  .rates-table{width:100%; border-collapse:collapse;}
+  .rates-table th{
+    text-align:left; padding:0 6px 8px; height:32px; vertical-align:bottom;
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:11px;
+    letter-spacing:0.16em; text-transform:uppercase; color:var(--ink-soft);
+  }
+  .rates-table tbody td{
+    text-align:left; padding:0 6px; height:calc(var(--sh) * 2); vertical-align:middle;
+    font-size:16.5px;
+  }
+  .lv{display:flex; align-items:center; gap:18px;}
+  .lv .sierp{width:var(--s); flex:0 0 auto;}
+  .rates-table td.num{
+    font-family:'Space Grotesk', sans-serif; font-size:16px; font-weight:500;
+    font-variant-numeric:tabular-nums; color:var(--red); white-space:nowrap;
+  }
+  .trial-note{
+    margin-top:28px; font-size:15.5px; color:var(--ink-soft); font-style:italic;
+    padding-left:16px; border-left:2px solid var(--orange);
+  }
+
+  /* ---------- Philosophy ---------- */
+  .philosophy p{margin:0 0 28px; color:var(--ink-soft); font-size:17px; line-height:28px;}
+  .philosophy p:last-child{margin-bottom:0;}
+  .philosophy > .wrap > p:first-of-type::first-letter{
+    font-size:3.2rem; line-height:0.85; float:left;
+    margin:6px 12px 0 0; color:var(--red); font-style:italic;
+  }
+
+  /* ---------- Contact ---------- */
+  .contact{
+    position:relative; overflow:hidden;
+    background-color:var(--blue-deep);
+    color:#fff;
+    padding:70px 0 56px;
+  }
+  .contact-grid{
+    display:grid; grid-template-columns:minmax(0, 620px) calc(var(--s) * 4);
+    gap:56px; align-items:center; justify-content:space-between;
+  }
+  .contact-list{list-style:none; margin:0 0 34px; padding:0;}
+  .contact-list li{
+    display:flex; flex-wrap:wrap; align-items:baseline; gap:10px;
+    line-height:28px; color:#C6D5E5; font-size:17px;
+  }
+  .contact-list a{color:#fff; text-decoration-color:rgba(255,255,255,0.4);}
+  .contact-list .label{
+    font-family:'Space Grotesk', sans-serif; font-size:10.5px; font-weight:600;
+    letter-spacing:0.16em; text-transform:uppercase; color:#84A0BC;
+    flex:0 0 128px;
+  }
+  .contact .btn{background:var(--red); border-color:var(--red); color:#fff;}
+  .contact .btn:hover{background:var(--orange); border-color:var(--orange); color:var(--blue-deep);}
+  .payment-note{font-size:14.5px; color:#93AAC4; max-width:460px; margin-top:28px; line-height:28px;}
+
+  /* toothed edge into the dark panel; every second apex is a heavy vertex */
+  .tooth-top::after{
+    content:""; position:absolute; top:0; left:0; right:0; height:28px;
+    z-index:3; pointer-events:none;
+    background-color:var(--paper);
+    background-image:var(--grid-faint), var(--grid-heavy);
+    background-size:var(--c) 28px, var(--s) 112px;
+    background-position:0 var(--tooth-lat-y, 0px);
+    background-repeat:repeat;
+  }
+  @supports (mask: conic-gradient(#000 0 0)){
+    .tooth-top::after{
+      -webkit-mask:conic-gradient(from -45deg at 50% 100%, #000 0 90deg, transparent 0) var(--c) 0/var(--s2) 28px repeat-x;
+      mask:conic-gradient(from -45deg at 50% 100%, #000 0 90deg, transparent 0) var(--c) 0/var(--s2) 28px repeat-x;
+    }
+  }
+  @supports not (mask: conic-gradient(#000 0 0)){ .tooth-top::after{display:none;} }
+
+  /* ---------- footer ---------- */
+  footer{padding:0 0 28px; overflow:hidden;}
+  footer .inner{
+    display:flex; align-items:center; gap:12px;
+    font-family:'Space Grotesk', sans-serif; font-size:12px;
+    letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-soft);
+  }
+  footer .sierp{width:var(--s2); flex:0 0 auto;}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1010px){
+    .hero-grid, .contact-grid{grid-template-columns:minmax(0,1fr); gap:42px;}
+    .hero-art{width:calc(var(--s) * 8); max-width:100%; margin:0 auto;}
+    .contact-art{width:calc(var(--s) * 4); max-width:100%; margin:0 auto;}
+  }
+  @media (max-width:640px){
+    .carousel{width:100%; height:336px; margin-left:0;}
+  }
+  @media (max-width:520px){
+    body{font-size:17px;}
+    .hero{padding:56px 0 70px;}
+    section{padding:56px 0;}
+    .step{grid-template-columns:var(--s2) 1fr; gap:16px;}
+    .step-mark .sierp, .step-mark .n{width:var(--s2);}
+    .lv{gap:12px;}
+    .lv .sierp{width:var(--s2);}
+    .rates-table tbody td{font-size:15.5px;}
+    .rates-table td.num{white-space:normal;}
+    .contact-list .label{flex:0 0 100%;}
+    .contact{padding:84px 0 56px;}
+    footer .sierp{width:var(--s2);}
+  }
+</style>
+</head>
+<body class="lattice">
+
+<header class="hero lattice" data-lattice data-block>
+  <div class="wrap wide">
+    <div class="hero-grid">
+      <div>
+        <p class="kicker">Private math tutoring &middot; Greater Boston &amp; online</p>
+        <h1>Manya Tyutyunik</h1>
+        <p class="tagline">One-on-one math tutoring. <br>Grades 2 to 12 and beyond. Arithmetic through calculus, statistics, and competition math.</p>
+        <div class="cta-row" data-row="top">
+          <a class="btn primary" href="tel:+16175480275">Call or text</a>
+          <a class="btn tint-blue" href="mailto:manya.tyutyunik@gmail.com">Email</a>
+          <a class="btn tint-amber" href="https://wa.me/16175480275">WhatsApp</a>
+        </div>
+        <p class="contact-line"><a href="tel:+16175480275">617-548-0275</a> &middot; <a href="mailto:manya.tyutyunik@gmail.com">manya.tyutyunik@gmail.com</a></p>
+      </div>
+      <div class="hero-art">
+        <div class="ombre-frame" data-snap data-snap-move=".hero-art">
+          <img class="ombre" src="sierpinski_ombre_v2_transparent.svg" alt="" aria-hidden="true" width="1600" height="1600">
+        </div>
+        <p class="caption">Sierpi&#324;ski triangle &middot; depth 5</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="how" data-block>
+  <div class="sierp watermark right" data-depth="4" data-gap="0.94" data-mono="#B33A30" data-snap aria-hidden="true"></div>
+  <div class="wrap">
+    <h2>Getting Started</h2>
+    <div class="how-body">
+      <div class="steps" data-row="vtop">
+      <div class="step" data-row="fill">
+        <div class="step-mark">
+          <div class="sierp" data-depth="1" data-gap="0.94" data-mono="#F4A868"
+               data-snap data-snap-move=".how-body" data-snap-group="steps"></div>
+          <span class="n">01</span>
+        </div>
+        <div>
+          <h3>A phone call</h3>
+          <p>First, we talk. I want to know about your child, what they need, and what your family's goals are. Every student and every family is different, and I will adjust my approach depending on the situation.</p>
+          <p>And I will, in turn, answer any questions you may have, and most parents have many.</p>
+          <p>I can talk in either English or Russian, whichever is more comfortable for you.</p>
+        </div>
+      </div>
+      <div class="step" data-row="fill">
+        <div class="step-mark">
+          <div class="sierp" data-depth="2" data-gap="0.94" data-mono="#B33A30"
+               data-snap data-snap-move=".how-body" data-snap-group="steps"></div>
+          <span class="n">02</span>
+        </div>
+        <div>
+          <h3>Trial class and evaluation</h3>
+          <p>The student and I get to know each other. I assess where they are now in more detail: what concepts and skills they are comfortable with, what they’re shaky in, what they find easy and what is at the edge of their ability. This is a normal-length paid session.</p>
+          <p>Afterwards, we decide how we will move forward: how often we should meet and what success would look like.</p>
+        </div>
+      </div>
+      <div class="step" data-row="fill">
+        <div class="step-mark">
+          <div class="sierp" data-depth="3" data-gap="0.94" data-mono="#2E6E97"
+               data-snap data-snap-move=".how-body" data-snap-group="steps"></div>
+          <span class="n">03</span>
+        </div>
+        <div>
+          <h3>Regular classes</h3>
+          <p> The default is one session a week, an hour or 1.5 hours depending on age. Multiple times a week, longer sessions, or rarer classes are also all options. We can meet in person around Greater Boston, at your home or at a public library, or online, over Google Meet. </p>
+          <p>I assign homework, because math never sticks without practice. I usually don’t assign very <em>much</em> homework, because my students are busy people with lots of things to do, and I respect their time. I do ask that parents mostly not help their children with the homework: if they need help, we can go over it at the next class.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Placeholder photos. Swap the src values; object-position controls
+         the crop if a face ends up too high or low in the frame. -->
+    <div class="carousel" data-row="top">
+      <div class="frames">
+        <img class="frame is-on" src="headshot.jpg" alt="Manya Tyutyunik" width="565" height="528">
+        <img class="frame" src="rockwell.jpg" alt="" width="1148" height="1200">
+      </div>
+      <button class="cbtn prev" type="button" aria-label="Previous photo"></button>
+      <button class="cbtn next" type="button" aria-label="Next photo"></button>
+      <div class="dots"></div>
+    </div>
+    </div><!-- /.how-body -->
+  </div>
+</section>
+
+<section id="rates" data-block>
+  <div class="wrap">
+    <h2>Rates</h2>
+    <table class="rates-table">
+      <thead>
+        <tr><th>Level</th><th>Per hour</th><th>Per 1.5 hr</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="lv"><span class="sierp" data-depth="1" data-gap="0.94" data-mono="#F4A868"
+                data-snap data-snap-move=".rates-table" data-snap-group="rates"></span><span>Through Algebra II</span></div></td>
+          <td class="num">$40</td><td class="num">$60</td>
+        </tr>
+        <tr>
+          <td><div class="lv"><span class="sierp" data-depth="1" data-gap="0.94" data-mono="#B33A30"
+                data-snap data-snap-move=".rates-table" data-snap-group="rates"></span><span>Precalculus &amp; Calculus</span></div></td>
+          <td class="num">$50</td><td class="num">$75</td>
+        </tr>
+        <tr>
+          <td><div class="lv"><span class="sierp" data-depth="1" data-gap="0.94" data-mono="#2E6E97"
+                data-snap data-snap-move=".rates-table" data-snap-group="rates"></span><span>Enrichment &amp; competition math</span></div></td>
+          <td class="num">by request</td><td class="num">by request</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="trial-note">I accept payment by cash, check, Venmo, Zelle, or PayPal</p>
+  </div>
+</section>
+
+<section id="philosophy" class="philosophy" data-block>
+  <div class="sierp watermark left" data-depth="4" data-gap="0.94" data-mono="#2E6E97" data-snap aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="handnote">the part I care about most</span>
+    <h2>Teaching philosophy</h2>
+    <p>I see students as, above all, their own people, with their own dreams and preferences and a unique set of prior knowledge and experience. I respect their goals, their knowledge, and their time. Math turns out to be useful for most goals, if not in the specific skills we practice, then in the habits of thought it builds. That is why I am a math teacher. But also:</p>
+    <p>I love math. I think it's beautiful, quite apart from being useful. I don't try to convince my students of that. It would be counterproductive, and a little annoying. But a lot of them come around to it anyway, or at least stop seeing math as a chore.</p>
+    <p>And that is no coincidence. It is very difficult to like something when you are bad at it, or when you are bored stiff and are not being adequately challenged. And it is very difficult to put in the practice if it's not at least a little bit fun. And so I do my best to catch each student’s imagination and let them see the joy and beauty of mathematics. </p>
+    <p>I believe that while practice is necessary for true mastery, it should never be rote repetition and drudgery: boredom kills true knowledge and understanding.</p>
+  </div>
+</section>
+
+<section id="contact" class="contact tooth-top" data-block>
+  <div class="wrap wide">
+    <div class="contact-grid">
+      <div>
+        <ul class="contact-list">
+          <li><span class="label">Call or text</span><a href="tel:+16175480275">617-548-0275</a></li>
+          <li><span class="label">Email</span><a href="mailto:manya.tyutyunik@gmail.com">manya.tyutyunik@gmail.com</a></li>
+          <li><span class="label">WhatsApp</span><a href="https://wa.me/16175480275">message on WhatsApp</a></li>
+          <li><span class="label">Messenger</span>message me directly on Facebook</li>
+        </ul>
+        <div class="cta-row" data-row="top">
+          <a class="btn" href="mailto:manya.tyutyunik@gmail.com?subject=Tutoring%20inquiry">Get in touch</a>
+        </div>
+      </div>
+      <div class="contact-art">
+        <div class="sierp" data-depth="4" data-gap="0.95" data-palette="ombre" data-invert="1" data-stagger="1" data-snap></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer data-block="loose">
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* The heavy grid. Everything aligns to this; the faint grid is texture. */
+  var S  = 64.66325,   // heavy cell side
+      SH = 56,         // heavy row height
+      TILE_H = 112;    // vertical repeat of the heavy tile
+
+  /* ================= Sierpinski glyphs ================= */
+
+  var PALETTES = {
+    ombre: [[244,168,104], [179,58,48], [46,110,151]]   // orange, red, blue
+  };
+
+  var H = Math.sqrt(3) / 2 * 100;
+
+  function subdivide(a, b, c, level, path, out){
+    if(level === 0){ out.push({pts:[a,b,c], path:path}); return; }
+    var ab = [(a[0]+b[0])/2, (a[1]+b[1])/2],
+        bc = [(b[0]+c[0])/2, (b[1]+c[1])/2],
+        ca = [(c[0]+a[0])/2, (c[1]+a[1])/2];
+    subdivide(a,  ab, ca, level-1, path.concat(0), out);
+    subdivide(ab, b,  bc, level-1, path.concat(1), out);
+    subdivide(ca, bc, c,  level-1, path.concat(2), out);
+  }
+
+  function shrink(pts, k){
+    var gx = (pts[0][0]+pts[1][0]+pts[2][0])/3,
+        gy = (pts[0][1]+pts[1][1]+pts[2][1])/3;
+    return pts.map(function(p){ return [gx + (p[0]-gx)*k, gy + (p[1]-gy)*k]; });
+  }
+
+  function fmt(pts){
+    return pts.map(function(p){ return p[0].toFixed(2) + "," + p[1].toFixed(2); }).join(" ");
+  }
+
+  function mix(path, palette){
+    if(!path.length) return "rgb(" + palette[0].join(",") + ")";
+    var n = [0,0,0], i;
+    for(i = 0; i < path.length; i++) n[path[i]]++;
+    var r = 0, g = 0, b = 0;
+    for(i = 0; i < 3; i++){
+      var w = n[i] / path.length;
+      r += palette[i][0] * w; g += palette[i][1] * w; b += palette[i][2] * w;
+    }
+    return "rgb(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + ")";
+  }
+
+  function render(host){
+    var depth   = parseInt(host.getAttribute("data-depth"), 10) || 4;
+    var gap     = parseFloat(host.getAttribute("data-gap")) || 0.94;
+    var invert  = host.getAttribute("data-invert") === "1";
+    var mono    = host.getAttribute("data-mono");
+    var palette = PALETTES[host.getAttribute("data-palette")] || PALETTES.ombre;
+    var stagger = host.getAttribute("data-stagger") === "1";
+
+    var a = invert ? [50, H] : [50, 0],
+        b = invert ? [0, 0]  : [0, H],
+        c = invert ? [100,0] : [100, H];
+
+    var leaves = [];
+    subdivide(a, b, c, depth, [], leaves);
+
+    var groups = [[], [], []];
+    leaves.forEach(function(leaf){
+      groups[leaf.path.length ? leaf.path[0] : 0].push(leaf);
+    });
+
+    var svg = '<svg viewBox="0 0 100 ' + H.toFixed(2) + '" aria-hidden="true" focusable="false">';
+    groups.forEach(function(group, gi){
+      if(!group.length) return;
+      svg += '<g style="animation-delay:' + (stagger ? (gi * 0.13).toFixed(2) : "0") + 's">';
+      group.forEach(function(leaf){
+        svg += '<polygon points="' + fmt(shrink(leaf.pts, gap)) +
+               '" fill="' + (mono || mix(leaf.path, palette)) + '"/>';
+      });
+      svg += '</g>';
+    });
+    host.innerHTML = svg + '</svg>';
+  }
+
+  var hosts = document.querySelectorAll(".sierp");
+  for(var i = 0; i < hosts.length; i++) render(hosts[i]);
+
+  /* ================= seating everything on the heavy grid =================
+
+     Heavy vertices sit at (i*S + (j mod 2)*S/2, j*SH). A triangle is
+     "on the grid" when its apex is one of those points: both its sloping
+     edges then lie along heavy diagonals.
+
+     1. rhythm    - push each marked box onto a heavy row, and pad each
+                    step out to a whole number of heavy rows, so the
+                    marks inside are already sitting on rules before
+                    anything gets nudged.
+     2. seatPanels- re-anchor the lattice each panel paints itself.
+     3. snapMarks - translate each mark's apex onto the nearest heavy
+                    vertex. Marks sharing a data-snap-group take the
+                    first one's offset so they stay aligned to each
+                    other, and data-snap-move picks what actually moves,
+                    so a mark never drifts away from its own text. */
+
+  function docTop(el){ return el.getBoundingClientRect().top + window.pageYOffset; }
+  function upTo(v, step){ var d = (step - (v % step)) % step; return d < 0.02 ? 0 : d; }
+
+  var blocks = document.querySelectorAll("[data-block]");
+  var marks  = document.querySelectorAll("[data-snap]");
+  var panels = document.querySelectorAll("[data-lattice]");
+  var rows   = document.querySelectorAll("[data-row]");
+
+  function mover(el){
+    var sel = el.getAttribute("data-snap-move");
+    if(!sel) return el;
+    return sel === "parent" ? el.parentNode : (el.closest(sel) || el);
+  }
+
+  /* Padding, not margin: a top margin here would collapse into the
+     previous element's bottom margin and do nothing.
+
+     Both of these iterate, because adding padding can move the very box
+     being measured - the hero's two columns are centre-aligned, so
+     growing the text column shifts it back up by half of what was added.
+     The correction shrinks geometrically, so a few passes settle it. */
+  function settleTop(el, step){
+    el.style.paddingTop = "";
+    var base = parseFloat(window.getComputedStyle(el).paddingTop) || 0;
+    var extra = 0, k, d;
+    for(k = 0; k < 16; k++){
+      d = upTo(docTop(el) + base + extra, step);
+      if(d < 0.02) break;
+      extra += d;
+      el.style.paddingTop = (base + extra).toFixed(2) + "px";
+    }
+  }
+
+  function settleBottom(el, step){
+    el.style.paddingBottom = "";
+    var base = parseFloat(window.getComputedStyle(el).paddingBottom) || 0;
+    var extra = 0, k, d;
+    for(k = 0; k < 16; k++){
+      d = upTo(docTop(el) + el.getBoundingClientRect().height, step);
+      if(d < 0.02) break;
+      extra += d;
+      el.style.paddingBottom = (base + extra).toFixed(2) + "px";
+    }
+  }
+
+  function rhythm(){
+    var i, j, el, inner, mode;
+
+    for(i = 0; i < rows.length; i++){ rows[i].style.paddingTop = ""; rows[i].style.paddingBottom = ""; }
+    for(i = 0; i < blocks.length; i++) blocks[i].style.paddingBottom = "";
+
+    /* Bands in document order. Everything inside a band is settled before
+       the band's own bottom is squared off, and each band is measured
+       after the ones above it have stopped moving. */
+    for(i = 0; i < blocks.length; i++){
+      el = blocks[i];
+      inner = el.querySelectorAll("[data-row]");
+      for(j = 0; j < inner.length; j++){
+        mode = inner[j].getAttribute("data-row");
+        /* "vtop" and "fill" round to TWO heavy rows, not one. Vertices
+           shift half a cell sideways on alternate rows, so a group of
+           marks an odd number of rows apart could not share one offset. */
+        if(mode === "top")       settleTop(inner[j], SH);
+        else if(mode === "vtop") settleTop(inner[j], SH * 2);
+        else                     settleBottom(inner[j], SH * 2);
+      }
+      if(el.getAttribute("data-block") !== "loose") settleBottom(el, SH);
+    }
+  }
+
+  function seatPanels(){
+    var i, el;
+    for(i = 0; i < panels.length; i++){
+      el = panels[i];
+      el.style.backgroundPosition = "0px " + (-(docTop(el) % TILE_H)).toFixed(2) + "px";
+    }
+    el = document.querySelector(".tooth-top");
+    if(el) el.style.setProperty("--tooth-lat-y", (-(docTop(el) % TILE_H)).toFixed(2) + "px");
+  }
+
+  function snapMarks(){
+    var i, el, r, apexX, apexY, J, off, targetX, dx, dy, key;
+    var groups = {};
+
+    for(i = 0; i < marks.length; i++) mover(marks[i]).style.transform = "";
+    void document.body.offsetWidth;   // flush the reset before measuring
+
+    for(i = 0; i < marks.length; i++){
+      el = marks[i];
+      r = el.getBoundingClientRect();
+      if(!r.width) continue;
+
+      apexX = r.left + window.pageXOffset + r.width / 2;
+      apexY = r.top  + window.pageYOffset +
+              (el.getAttribute("data-invert") === "1" ? r.height : 0);
+
+      J = Math.round(apexY / SH);
+      off = (J % 2) * (S / 2);                       // odd rows are half a cell over
+      targetX = Math.round((apexX - off) / S) * S + off;
+
+      dx = targetX - apexX;
+      dy = J * SH - apexY;
+
+      /* never let the nudge carry a mark off the left of the screen */
+      while(r.left + window.pageXOffset + dx < 8) dx += S;
+
+      key = el.getAttribute("data-snap-group");
+      if(key){
+        if(!groups[key]) groups[key] = [dx, dy];
+        dx = groups[key][0]; dy = groups[key][1];
+      }
+
+      mover(el).style.transform = "translate(" + dx.toFixed(2) + "px," + dy.toFixed(2) + "px)";
+    }
+  }
+
+  function layout(){ rhythm(); seatPanels(); snapMarks(); }
+
+  layout();
+  window.addEventListener("resize", layout);
+  window.addEventListener("load", layout);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+
+  /* ================= photo carousel ================= */
+  (function(){
+    var box = document.querySelector(".carousel");
+    if(!box) return;
+    var slides = box.querySelectorAll(".frame");
+    var dots   = box.querySelector(".dots");
+    var at = 0, k;
+
+    for(k = 0; k < slides.length; k++){
+      var d = document.createElement("button");
+      d.type = "button";
+      d.className = "dot";
+      d.setAttribute("aria-label", "Photo " + (k + 1));
+      d.setAttribute("aria-selected", k === 0 ? "true" : "false");
+      (function(n){ d.addEventListener("click", function(){ go(n); }); })(k);
+      dots.appendChild(d);
+    }
+
+    function go(n){
+      at = (n + slides.length) % slides.length;
+      for(var i = 0; i < slides.length; i++){
+        slides[i].classList.toggle("is-on", i === at);
+        dots.children[i].setAttribute("aria-selected", i === at ? "true" : "false");
+      }
+    }
+
+    box.querySelector(".prev").addEventListener("click", function(){ go(at - 1); });
+    box.querySelector(".next").addEventListener("click", function(){ go(at + 1); });
+    box.addEventListener("keydown", function(e){
+      if(e.key === "ArrowLeft"){ go(at - 1); }
+      else if(e.key === "ArrowRight"){ go(at + 1); }
+    });
+  })();
+
+})();
+</script>
+
+</body>
+</html>
