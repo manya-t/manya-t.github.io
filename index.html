@@ -27,7 +27,7 @@
     --paper:#FBF8F2;
     --paper-2:#F5EFE4;
     --ink:#33211D;         /* the red branch carried to near-black */
-    --ink-soft:#7A6154;    /* the artwork's neutral branch */
+    --ink-soft:#55443b;    /* the artwork's neutral branch */
     --red:#B33A30;
     --red-deep:#8F2C24;
     --orange:#F4A868;      /* the basic orange */
@@ -195,7 +195,7 @@
      Each step is padded out to a whole number of heavy rows by the
      script, so all three marks sit on rules and keep the same distance
      from their own headings. */
-  .steps{display:flex; flex-direction:column; gap:0;}
+  .steps{display:flex; flex-direction:column; gap:0; margin-top:48px;}
   .step{
     display:grid; grid-template-columns:var(--s) 1fr;
     gap:24px; align-items:start; padding-bottom:14px;
@@ -223,6 +223,26 @@
   }
   .can-list li:last-child{margin-bottom:0;}
   .can-list .sierp{width:var(--c); margin-top:6px;}   /* centred on the first line */
+
+  /* ---------- Testimonials ----------
+     Same construction as the steps: each entry is padded out to a whole
+     number of double heavy-rows, so all three marks sit on rules and
+     share one horizontal offset. */
+  .tm-list{display:flex; flex-direction:column; gap:0; margin-top:48px;}
+  .tm{
+    display:grid; grid-template-columns:var(--s2) 1fr;
+    gap:24px; align-items:start; padding-bottom:14px;
+  }
+  .tm-mark .sierp{width:var(--s2);}
+  .tm blockquote{
+    margin:0; font-size:17px; line-height:28px;
+    font-style:italic; color:var(--ink);
+  }
+  .tm-by{
+    margin:10px 0 0;
+    font-family:'Space Grotesk', sans-serif; font-size:11px; font-weight:600;
+    letter-spacing:0.16em; text-transform:uppercase; color:var(--ink-soft);
+  }
 
   /* ---------- photo carousel ---------- */
   .carousel{
@@ -410,7 +430,7 @@
   <div class="wrap">
     <h2>Getting Started</h2>
     <div class="how-body">
-      <div class="steps" data-row="vtop">
+      <div class="steps">
       <div class="step" data-row="fill">
         <div class="step-mark">
           <div class="sierp" data-depth="1" data-gap="0.94" data-mono="#F4A868"
@@ -537,6 +557,47 @@
     <p>I love math. I think it's beautiful, quite apart from being useful. I don't try to convince my students of that. It would be counterproductive, and a little annoying. But a lot of them come around to it anyway, or at least stop seeing math as a chore.</p>
     <p>And that is no coincidence. It is very difficult to like something when you are bad at it, or when you are bored stiff and are not being adequately challenged. And it is very difficult to put in the practice if it's not at least a little bit fun. And so I do my best to catch each student’s imagination and let them see the joy and beauty of mathematics. </p>
     <p>I believe that while practice is necessary for true mastery, it should never be rote repetition and drudgery: boredom kills true knowledge and understanding.</p>
+  </div>
+</section>
+
+<section id="testimonials" data-block>
+  <div class="wrap">
+    <h2>Testimonials</h2>
+    <!-- PLACEHOLDER x3. Replace the blockquote text and the .tm-by line in
+         each block. Two or three lines per quote keeps each one inside a
+         single grid slot; longer ones just take the next slot down. -->
+    <div class="tm-list">
+      <div class="tm" data-row="fill">
+        <div class="tm-mark">
+          <div class="sierp" data-depth="1" data-gap="0.94" data-mono="#F4A868"
+               data-snap data-snap-move=".tm-list" data-snap-group="tms"></div>
+        </div>
+        <div>
+          <blockquote>Placeholder. A first testimonial goes here &mdash; two or three sentences is about right, and something specific about what changed for the student reads better than general praise.</blockquote>
+          <p class="tm-by">Name &middot; parent of a 6th grader</p>
+        </div>
+      </div>
+      <div class="tm" data-row="fill">
+        <div class="tm-mark">
+          <div class="sierp" data-depth="1" data-gap="0.94" data-mono="#B33A30"
+               data-snap data-snap-move=".tm-list" data-snap-group="tms"></div>
+        </div>
+        <div>
+          <blockquote>Placeholder. A second testimonial. It helps if this one speaks to something different from the first, so the three together cover a range.</blockquote>
+          <p class="tm-by">Name &middot; parent of a 9th grader</p>
+        </div>
+      </div>
+      <div class="tm" data-row="fill">
+        <div class="tm-mark">
+          <div class="sierp" data-depth="1" data-gap="0.94" data-mono="#2E6E97"
+               data-snap data-snap-move=".tm-list" data-snap-group="tms"></div>
+        </div>
+        <div>
+          <blockquote>Placeholder. A third. Short ones work fine too.</blockquote>
+          <p class="tm-by">Name &middot; adult student</p>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -713,6 +774,18 @@
     if(d >= 0.02) el.style.paddingBottom = (base + d).toFixed(2) + "px";
   }
 
+  /* Rounds the box's own HEIGHT, not its position on the page. That is
+     what a run of marks actually needs: equal spacing between them, so
+     they all keep the same row parity. Pinning them to absolute rows as
+     well would force the first one down by up to a whole slot, which is
+     just dead space under the heading. */
+  function settleHeight(el, step){
+    el.style.paddingBottom = "";
+    var base = parseFloat(window.getComputedStyle(el).paddingBottom) || 0;
+    var d = upTo(el.getBoundingClientRect().height, step);
+    if(d >= 0.02) el.style.paddingBottom = (base + d).toFixed(2) + "px";
+  }
+
   function rhythm(){
     var i, j, el, inner, mode;
 
@@ -732,7 +805,7 @@
            marks an odd number of rows apart could not share one offset. */
         if(mode === "top")       settleTop(inner[j], SH);
         else if(mode === "vtop") settleTop(inner[j], SH * 2);
-        else                     settleBottom(inner[j], SH * 2);
+        else                     settleHeight(inner[j], SH * 2);
       }
       if(el.getAttribute("data-block") !== "loose") settleBottom(el, SH);
     }
