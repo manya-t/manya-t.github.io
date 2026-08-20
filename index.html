@@ -246,13 +246,13 @@
 
   /* ---------- photo carousel ---------- */
   .carousel{
-    position:relative; width:calc(var(--s) * 8); height:448px;
+    position:relative; width:calc(var(--s) * 9); height:336px;
     margin:42px 0;
   }
   .frames{position:absolute; inset:0; overflow:hidden; background:var(--paper-2);}
   .frame{
     position:absolute; inset:0; width:100%; height:100%;
-    object-fit:cover; object-position:50% 38%;
+    object-fit:cover; object-position:50% 50%;
     opacity:0; transition:opacity 0.45s ease;
   }
   .frame.is-on{opacity:1;}
@@ -381,7 +381,7 @@
     .contact-art{width:calc(var(--s) * 4); max-width:100%; margin:0 auto;}
   }
   @media (max-width:640px){
-    .carousel{width:100%; height:336px; margin-left:0;}
+    .carousel{width:100%; height:224px; margin-left:0;}
   }
   @media (max-width:520px){
     body{font-size:17px;}
@@ -509,8 +509,12 @@
          the crop if a face ends up too high or low in the frame. -->
     <div class="carousel" data-row="top">
       <div class="frames">
-        <img class="frame is-on" src="headshot.jpg" alt="Manya Tyutyunik" width="565" height="528">
-        <img class="frame" src="rockwell.jpg" alt="" width="1148" height="1200">
+        <img class="frame is-on" src="photo_old_with_sanya.jpeg" alt="Manya at a whiteboard working through a geometry problem with a student"
+             width="2048" height="1152">
+        <img class="frame" src="rockwell.jpg" alt="" width="1148" height="1200"
+             style="object-position:50% 8%">
+        <img class="frame" src="with_slava.jpg" alt="Manya folding origami with an adult student"
+             width="684" height="947" style="object-position:50% 55%">
       </div>
       <button class="cbtn prev" type="button" aria-label="Previous photo"></button>
       <button class="cbtn next" type="button" aria-label="Next photo"></button>
